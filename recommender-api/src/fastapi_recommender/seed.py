@@ -1,38 +1,67 @@
-from models import SessionLocal, User, Product, Purchase
+from models import SessionLocal, User, Product, Rating
+from pathlib import Path
+import pandas as pd
 
 db = SessionLocal()
 
-# Create dummy users
-users = [
-    User(name="Alice"),
-    User(name="Bob"),
-    User(name="Charlie"),
-]
+current_folder = Path(__file__).parent
+csv_file = current_folder / "amazon_electronics.csv"
 
-db.add_all(users)
+df = pd.read_csv(csv_file)
+print("CSV loaded successfully!")
+
+# Products import
+for _,row in df.iterrows():
+    product = Product(
+        product_id=row["product_id"],
+        product_name=row["product_name"],
+        category=row["category"],
+        discounted_price=float(row["discounted_price"].replace(',', '')) if pd.notna(row["discounted_price"]) else None,
+        actual_price=float(row["actual_price"].replace(',', '')) if pd.notna(row["actual_price"]) else None,
+        discount_percentage=float(row["discount_percentage"].replace('%', '')) if pd.notna(row["discount_percentage"]) else None,
+        rating_count=int(row["rating_count"].replace(',', '')) if pd.notna(row["rating_count"]) else None,
+        about_product=row["about_product"],
+        img_link=row["img_link"],
+        product_link=row["product_link"]
+    )
+    db.add(product)
+
 db.commit()
 
-# Create dummy products
-dummy_products = [
-    Product(name="Laptop", description="High-end gaming laptop", price=1500),
-    Product(name="Smartphone", description="Latest model smartphone", price=999),
-    Product(name="Headphones", description="Noise-cancelling headphones", price=199),
-    Product(name="Smartwatch", description="Water-resistant smartwatch", price=249),
-    Product(name="Tablet", description="Lightweight tablet", price=499)
-]
+print("Products imported successfully!")
 
-db.add_all(dummy_products)
+# Users import
+for _,row in df.iterrows():
+    user = User(
+        user_id=row["user_id"],
+        user_name=row["user_name"],
+        Country=row["Country"],
+        Age=row["Age"],
+        City=row["City"],
+        Marital_Status=row["Marital_Status"]
+    )
+    db.add(user)
+
 db.commit()
 
-# Add dummy purchases
-purchases = [
-    Purchase(user_id=1, product_id=1, quantity=50),
-    Purchase(user_id=2, product_id=2, quantity=30),
-    Purchase(user_id=3, product_id=3, quantity=40),
-    Purchase(user_id=1, product_id=4, quantity=20),
-    Purchase(user_id=2, product_id=5, quantity=35)
-]
+print("Users imported successfully!")
 
-db.add_all(purchases)
+# Ratings import
+for _,row in df.iterrows():
+    rating = Rating(
+        product_id=row["product_id"],
+        user_id=row["user_id"],
+        rating=row["rating"],
+        review_id=row["review_id"],
+        review_title=row["review_title"],
+        review_content=row["review_content"],
+        Used_Device=row["Used_Device"],
+        Day_of_Week=row["Day_of_Week"]
+    )
+    db.add(rating)
+
 db.commit()
+
+print("Ratings imported successfully!")
+
 db.close()
