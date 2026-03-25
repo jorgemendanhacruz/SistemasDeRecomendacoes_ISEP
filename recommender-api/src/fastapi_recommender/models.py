@@ -16,6 +16,7 @@ class User(Base):
 
     user_id = Column(String, primary_key=True, index=True)
     user_name = Column(String, index=True)
+    user_pass = Column(String)
     Country = Column(String)
     Age = Column(Integer)
     City = Column(String)

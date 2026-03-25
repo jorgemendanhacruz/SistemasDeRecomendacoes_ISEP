@@ -58,6 +58,7 @@ for row in df.itertuples(index=False):
     user = User(
         user_id=user_id,
         user_name=row.user_name,
+        user_pass="pass123",
         Country=row.Country,
         Age=row.Age,
         City=row.City,
