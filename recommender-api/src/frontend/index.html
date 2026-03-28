@@ -1,65 +1,2094 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Top Recommended Items</title>
+    <title>ElectroFind | Recomendador Inteligente</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --text: #111827;
+            --muted: #6b7280;
+            --line: #e5e7eb;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --dark: #0f172a;
+            --success: #15803d;
+            --warning: #b45309;
+            --danger: #dc2626;
+            --pink: #e11d48;
+            --shadow-sm: 0 6px 18px rgba(0,0,0,0.05);
+            --shadow-md: 0 10px 28px rgba(15,23,42,0.08);
+            --shadow-lg: 0 18px 38px rgba(15,23,42,0.12);
+        }
+
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            text-align: center;
-            padding: 20px;
+            background: var(--bg);
+            color: var(--text);
         }
-        .container {
-            max-width: 600px;
-            margin: auto;
+
+        button, input, select {
+            font: inherit;
+        }
+
+        header {
+            background: linear-gradient(90deg, #0f172a, #111827);
+            color: white;
+            padding: 14px 22px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.14);
+        }
+
+        .navbar {
+            max-width: 1360px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.4px;
+        }
+
+        .brand-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #60a5fa, #2563eb);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 1px 4px rgba(255,255,255,0.25);
+            font-size: 20px;
+        }
+
+        .brand span {
+            color: #60a5fa;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background: transparent;
+            color: #d1d5db;
+            border: 1px solid transparent;
+            padding: 10px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover,
+        .nav-btn.active {
+            color: white;
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.14);
+        }
+
+        .fav-count {
+            min-width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            background: #ef4444;
+            color: white;
+            font-size: 12px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 7px;
+        }
+
+        main {
+            max-width: 1360px;
+            margin: 28px auto 50px auto;
+            padding: 0 20px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .hero {
+            background:
+                radial-gradient(circle at top right, rgba(255,255,255,0.15), transparent 22%),
+                linear-gradient(135deg, #0f172a, #1d4ed8 55%, #3b82f6);
+            color: white;
+            border-radius: 28px;
+            padding: 42px 34px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.3fr 0.9fr;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .hero h1 {
+            font-size: 46px;
+            margin-bottom: 14px;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: #e5e7eb;
+            max-width: 760px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 14px;
+            padding: 13px 18px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
             background: white;
+            color: #111827;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.12);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.22);
+        }
+
+        .hero-side {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .hero-mini-card {
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 20px;
+            padding: 18px;
+            backdrop-filter: blur(6px);
+        }
+
+        .hero-mini-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+        }
+
+        .hero-mini-value {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .section-header {
+            margin-bottom: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .section-title {
+            font-size: 34px;
+            font-weight: 800;
+            color: #111827;
+        }
+
+        .section-subtitle {
+            margin-top: 6px;
+            font-size: 15px;
+            color: #6b7280;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
             padding: 20px;
+            border: 1px solid #e5e7eb;
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .stat-label {
+            margin-top: 8px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .feature-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .feature-card {
+            background: linear-gradient(180deg, #ffffff, #f8fafc);
+            border-radius: 20px;
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow-sm);
+            padding: 18px;
+        }
+
+        .feature-card strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 16px;
+        }
+
+        .feature-card p {
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .toolbar-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .search-box,
+        .select-box,
+        .category-search-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            padding: 12px 14px;
+            border-radius: 14px;
+            min-width: 250px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+
+        .search-box input,
+        .select-box select,
+        .category-search-box input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 15px;
+            color: var(--text);
+        }
+
+        .catalog-layout {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 22px;
+        }
+
+        .side-panel {
+            background: white;
+            border-radius: 22px;
+            border: 1px solid #e5e7eb;
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            height: fit-content;
+            position: sticky;
+            top: 96px;
+        }
+
+        .side-panel-header {
+            padding: 22px 22px 14px 22px;
+            border-bottom: 1px solid #e5e7eb;
+            background: linear-gradient(180deg, #ffffff, #f8fafc);
+        }
+
+        .side-panel-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #111827;
+        }
+
+        .sidebar-meta {
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .category-sidebar-scroll {
+            max-height: 68vh;
+            overflow-y: auto;
+        }
+
+        .category-group {
+            border-bottom: 1px solid #eef2f7;
+        }
+
+        .category-header-btn {
+            width: 100%;
+            background: transparent;
+            border: none;
+            padding: 18px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-size: 17px;
+            font-weight: 800;
+            color: #111827;
+            text-align: left;
+        }
+
+        .category-header-btn:hover {
+            background: #f8fafc;
+        }
+
+        .category-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .category-header-count {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .category-chevron {
+            transition: transform 0.2s ease;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .category-group.open .category-chevron {
+            transform: rotate(90deg);
+        }
+
+        .category-items {
+            display: none;
+            padding-bottom: 8px;
+        }
+
+        .category-group.open .category-items {
+            display: block;
+        }
+
+        .subcategory-item {
+            padding: 14px 22px 14px 30px;
+            font-size: 15px;
+            color: #374151;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            transition: 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .subcategory-item:hover {
+            background: #f8fafc;
+        }
+
+        .subcategory-item.active {
+            background: #e5eefc;
+            color: #1d4ed8;
+            font-weight: 800;
+            border-left-color: #2563eb;
+        }
+
+        .subcategory-main {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .subcategory-count {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .content-panel {
+            min-width: 0;
+        }
+
+        .status-message,
+        .subcategory-empty,
+        .favorites-empty {
+            background: white;
+            border-radius: 18px;
+            padding: 24px;
+            text-align: center;
+            color: #6b7280;
+            border: 1px solid #e5e7eb;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .subcategory-topbar {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            box-shadow: var(--shadow-sm);
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        .subcategory-topbar-grid {
+            display: grid;
+            grid-template-columns: 1.2fr auto auto;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .subcategory-kpis {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .subcategory-kpi {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .chips-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .chip {
+            border: 1px solid #dbe3f0;
+            background: #f8fafc;
+            color: #334155;
+            padding: 8px 12px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .chip:hover,
+        .chip.active {
+            background: #e5eefc;
+            color: #1d4ed8;
+            border-color: #bfd3fb;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 22px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            box-shadow: var(--shadow-md);
+            transition: 0.22s ease;
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 30px rgba(0,0,0,0.10);
+        }
+
+        .product-image {
+            height: 220px;
+            background: linear-gradient(135deg, #dbeafe, #eff6ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .emoji-fallback {
+            font-size: 56px;
+        }
+
+        .fav-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            background: rgba(255,255,255,0.94);
+            font-size: 20px;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+        }
+
+        .fav-btn.active {
+            background: #fee2e2;
+        }
+
+        .product-content {
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .badge-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .badge-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-block;
+            border-radius: 999px;
+            padding: 7px 10px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .badge-top {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .badge-cat {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        .badge-rating {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .badge-count {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .product-title {
+            font-size: 20px;
+            font-weight: 800;
+            line-height: 1.35;
+            margin-bottom: 10px;
+            min-height: 78px;
+            color: #111827;
+        }
+
+        .product-meta {
+            font-size: 14px;
+            color: #4b5563;
+            margin-bottom: 7px;
+            line-height: 1.45;
+        }
+
+        .pill-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .pill {
+            background: #f1f5f9;
+            color: #334155;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .price-row {
+            margin-top: 14px;
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .price {
+            font-size: 27px;
+            font-weight: 800;
+            color: #15803d;
+        }
+
+        .old-price {
+            font-size: 14px;
+            color: #9ca3af;
+            text-decoration: line-through;
+        }
+
+        .discount-label {
+            font-size: 13px;
+            font-weight: 800;
+            color: #dc2626;
+        }
+
+        .card-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .small-note {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .view-btn,
+        .ghost-btn {
+            border: none;
+            border-radius: 11px;
+            padding: 10px 14px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .view-btn {
+            background: #111827;
+            color: white;
+        }
+
+        .view-btn:hover {
+            background: #1f2937;
+        }
+
+        .ghost-btn {
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .ghost-btn:hover {
+            background: #dbeafe;
+        }
+
+        .favorites-empty h3,
+        .subcategory-empty h3 {
+            margin-bottom: 8px;
+            color: #111827;
+        }
+
+        .pagination {
+            margin-top: 22px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            background: #111827;
+            color: white;
+            border: none;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 10px 14px;
+            cursor: pointer;
+            font-weight: 800;
         }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            padding: 10px;
-            background: #e0e0e0;
-            margin: 5px 0;
-            border-radius: 5px;
-        }
-    </style>
-    <script>
-        async function loadRecommendations() {
-            try {
-                const response = await fetch("http://127.0.0.1:8000/recommendations/");
-                const products = await response.json();
 
-                const recommendationsList = document.getElementById("recommendations");
-                recommendationsList.innerHTML = "";
+        .pagination button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
 
-                if (products.length === 0) {
-                    recommendationsList.innerHTML = "<li>No recommendations available.</li>";
-                } else {
-                    products.forEach(product => {
-                        const listItem = document.createElement("li");
-                        listItem.innerHTML = `<strong>${product.name}</strong> - $${product.price} <br> <span>Total Purchases: ${product.total_purchases}</span>`;
-                        recommendationsList.appendChild(listItem);
-                    });
-                }
-            } catch (error) {
-                console.error("Error fetching recommendations:", error);
-                document.getElementById("recommendations").innerHTML = "<li>Failed to load recommendations.</li>";
+        .pagination span {
+            font-weight: 800;
+            color: #374151;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.55);
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            width: 100%;
+            max-width: 900px;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.22);
+        }
+
+        .modal-header {
+            background: #111827;
+            color: white;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 22px;
+        }
+
+        .modal-image {
+            height: 280px;
+            border-radius: 18px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #dbeafe, #eff6ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-fallback {
+            font-size: 62px;
+        }
+
+        .modal-details h3 {
+            font-size: 28px;
+            margin-bottom: 14px;
+        }
+
+        .modal-details p {
+            margin-bottom: 10px;
+            color: #4b5563;
+            line-height: 1.55;
+        }
+
+        .modal-links {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .modal-links a,
+        .modal-links button {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+        }
+
+        footer {
+            margin-top: 36px;
+            padding: 22px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+            border-top: 1px solid #e5e7eb;
+            background: #fafafa;
+        }
+
+        @media (max-width: 1120px) {
+            .catalog-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .stats,
+            .feature-strip {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .hero-grid,
+            .modal-grid,
+            .subcategory-topbar-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .side-panel {
+                position: static;
+            }
+
+            .category-sidebar-scroll {
+                max-height: none;
             }
         }
-        window.onload = loadRecommendations;
-    </script>
+
+        @media (max-width: 700px) {
+            .stats,
+            .feature-strip,
+            .hero-side {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .section-title {
+                font-size: 28px;
+            }
+
+            .search-box,
+            .select-box,
+            .category-search-box {
+                min-width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Top Recommended Items</h1>
-        <ul id="recommendations"></ul>
+    <header>
+        <div class="navbar">
+            <div class="brand">
+                <div class="brand-badge">⚡</div>
+                <div>Electro<span>Find</span></div>
+            </div>
+
+            <div class="nav-menu">
+                <button class="nav-btn active" data-page="homePage" onclick="showPage('homePage', this)">Início</button>
+                <button class="nav-btn" data-page="topPage" onclick="showPage('topPage', this)">Mais populares</button>
+                <button class="nav-btn" data-page="catalogPage" onclick="showPage('catalogPage', this)">Catálogo</button>
+                <button class="nav-btn" data-page="categoriesPage" onclick="showPage('categoriesPage', this)">Categorias</button>
+                <button class="nav-btn" data-page="favoritesPage" onclick="showPage('favoritesPage', this)">
+                    Favoritos
+                    <span class="fav-count" id="favoritesCounter">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="homePage" class="page active">
+            <div class="hero">
+                <div class="hero-grid">
+                    <div>
+                        <h1>Descobre produtos por recomendação, categoria e subcategoria</h1>
+                        <p>
+                            Explora os produtos mais populares, navega pelo catálogo completo e percorre
+                            categorias e subcategorias numa interface mais parecida com um marketplace.
+                        </p>
+                        <div class="hero-actions">
+                            <button class="btn btn-primary" onclick="activatePageById('topPage')">Ver mais populares</button>
+                            <button class="btn btn-secondary" onclick="activatePageById('categoriesPage')">Explorar categorias</button>
+                        </div>
+                    </div>
+
+                    <div class="hero-side">
+                        <div class="hero-mini-card">
+                            <div class="hero-mini-label">Destaques</div>
+                            <div class="hero-mini-value" id="heroTop">0</div>
+                        </div>
+                        <div class="hero-mini-card">
+                            <div class="hero-mini-label">Catálogo</div>
+                            <div class="hero-mini-value" id="heroCatalog">0</div>
+                        </div>
+                        <div class="hero-mini-card">
+                            <div class="hero-mini-label">Subcategorias</div>
+                            <div class="hero-mini-value" id="heroSubcategories">0</div>
+                        </div>
+                        <div class="hero-mini-card">
+                            <div class="hero-mini-label">Favoritos</div>
+                            <div class="hero-mini-value" id="heroFavorites">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="statTop">0</div>
+                    <div class="stat-label">Produtos em destaque</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statCatalog">0</div>
+                    <div class="stat-label">Produtos no catálogo</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statAvg">0.00</div>
+                    <div class="stat-label">Média de rating dos destaques</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statCategories">0</div>
+                    <div class="stat-label">Subcategorias detetadas</div>
+                </div>
+            </div>
+
+            <div class="feature-strip">
+                <div class="feature-card">
+                    <strong>Mais populares</strong>
+                    <p>Produtos em destaque numa vista não personalizada.</p>
+                </div>
+                <div class="feature-card">
+                    <strong>Catálogo completo</strong>
+                    <p>Pesquisa, filtro por subcategoria e paginação.</p>
+                </div>
+                <div class="feature-card">
+                    <strong>Navegação por categorias</strong>
+                    <p>Estrutura organizada em grupos principais e subcategorias.</p>
+                </div>
+                <div class="feature-card">
+                    <strong>Favoritos locais</strong>
+                    <p>Produtos guardados no navegador com localStorage.</p>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <div>
+                    <div class="section-title">Pré-visualização dos destaques</div>
+                    <div class="section-subtitle">Os produtos mais relevantes disponíveis neste momento.</div>
+                </div>
+            </div>
+
+            <div id="homeTopPreview"></div>
+        </section>
+
+        <section id="topPage" class="page">
+            <div class="section-header">
+                <div class="section-title">Mais populares</div>
+                <div class="section-subtitle">Produtos em destaque selecionados pelo sistema base.</div>
+            </div>
+            <div id="topRecommendations"></div>
+        </section>
+
+        <section id="catalogPage" class="page">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">Catálogo</div>
+                    <div class="section-subtitle">Pesquisa produtos e filtra por subcategoria.</div>
+                </div>
+            </div>
+
+            <div class="toolbar-row">
+                <div class="search-box">
+                    <span>🔎</span>
+                    <input id="searchInput" type="text" placeholder="Pesquisar produtos..." oninput="filterProducts()">
+                </div>
+
+                <div class="select-box">
+                    <span>📂</span>
+                    <select id="subcategoryFilter" onchange="filterProducts()">
+                        <option value="">Todas as subcategorias</option>
+                    </select>
+                </div>
+
+                <div class="select-box">
+                    <span>↕</span>
+                    <select id="sortFilter" onchange="filterProducts()">
+                        <option value="name_asc">Ordenar: Nome A-Z</option>
+                        <option value="name_desc">Nome Z-A</option>
+                        <option value="price_asc">Preço crescente</option>
+                        <option value="price_desc">Preço decrescente</option>
+                        <option value="rating_desc">Maior rating</option>
+                        <option value="count_desc">Mais avaliações</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="allProducts"></div>
+        </section>
+
+        <section id="categoriesPage" class="page">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">Categorias</div>
+                    <div class="section-subtitle">Navega por categoria principal e subcategoria sem uma página interminável.</div>
+                </div>
+            </div>
+
+            <div class="catalog-layout">
+                <aside class="side-panel">
+                    <div class="side-panel-header">
+                        <div class="side-panel-title">Explorar categorias</div>
+                        <div class="sidebar-meta" id="sidebarMeta">0 categorias • 0 subcategorias</div>
+
+                        <div class="category-search-box" style="margin-top: 14px;">
+                            <span>🔎</span>
+                            <input
+                                id="categorySearchInput"
+                                type="text"
+                                placeholder="Pesquisar subcategoria..."
+                                oninput="renderCategorySidebar()"
+                            >
+                        </div>
+                    </div>
+
+                    <div id="categorySidebar" class="category-sidebar-scroll"></div>
+                </aside>
+
+                <div class="content-panel">
+                    <div id="subcategoryLanding">
+                        <div class="status-message">Escolhe uma subcategoria no menu à esquerda.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="favoritesPage" class="page">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">Favoritos</div>
+                    <div class="section-subtitle">Produtos guardados localmente neste navegador.</div>
+                </div>
+            </div>
+            <div id="favoritesList"></div>
+        </section>
+    </main>
+
+    <div id="modalOverlay" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal">
+            <div class="modal-header">
+                <div>Detalhes do produto</div>
+                <button class="modal-close" onclick="forceCloseModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
     </div>
+
+    <footer>
+        ElectroFind • Projeto de Sistema de Recomendação • ISEP
+    </footer>
+
+    <script>
+        let topProducts = [];
+        let allProducts = [];
+        let filteredProducts = [];
+        let currentPage = 1;
+        const itemsPerPage = 12;
+
+        let categoryStructure = {};
+        let subcategoryMap = {};
+        let openedCategory = null;
+        let selectedSubcategoryName = null;
+
+        let categoryCurrentPage = 1;
+        const categoryItemsPerPage = 8;
+        let categorySortMode = "name_asc";
+        let categoryQuickFilter = "all";
+
+        function escapeHtml(text) {
+            return String(text || "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function getFavorites() {
+            return JSON.parse(localStorage.getItem("electrofind_favorites") || "[]");
+        }
+
+        function setFavorites(favorites) {
+            localStorage.setItem("electrofind_favorites", JSON.stringify(favorites));
+        }
+
+        function isFavorite(productId) {
+            return getFavorites().includes(productId);
+        }
+
+        function toggleFavorite(productId) {
+            let favorites = getFavorites();
+
+            if (favorites.includes(productId)) {
+                favorites = favorites.filter(id => id !== productId);
+            } else {
+                favorites.push(productId);
+            }
+
+            setFavorites(favorites);
+            updateFavoritesCounter();
+            renderTopProducts();
+            renderHomeTopPreview();
+            renderFavorites();
+            renderAllProducts(filteredProducts.length ? filteredProducts : allProducts);
+
+            if (selectedSubcategoryName) {
+                renderSubcategoryProducts(selectedSubcategoryName);
+            }
+
+            renderCategorySidebar();
+        }
+
+        function updateFavoritesCounter() {
+            const count = getFavorites().length;
+            document.getElementById("favoritesCounter").textContent = count;
+            document.getElementById("heroFavorites").textContent = count;
+        }
+
+        function getEmojiForProduct(name) {
+            const lower = (name || "").toLowerCase();
+            if (lower.includes("mouse")) return "🖱️";
+            if (lower.includes("cable")) return "🔌";
+            if (lower.includes("coffee")) return "☕";
+            if (lower.includes("heater")) return "🔥";
+            if (lower.includes("adapter")) return "🔋";
+            if (lower.includes("phone")) return "📱";
+            if (lower.includes("watch")) return "⌚";
+            if (lower.includes("speaker")) return "🔊";
+            if (lower.includes("usb")) return "💾";
+            if (lower.includes("keyboard")) return "⌨️";
+            if (lower.includes("monitor")) return "🖥️";
+            if (lower.includes("head")) return "🎧";
+            return "📦";
+        }
+
+        function formatPrice(price) {
+            if (price === null || price === undefined || price === "" || isNaN(Number(price))) return "N/A";
+            return `$${Number(price).toFixed(2)}`;
+        }
+
+        function parseSubcategories(categoryValue) {
+            if (!categoryValue) return ["Outros"];
+            return categoryValue
+                .split(/[|&]/)
+                .map(c => c.trim())
+                .filter(Boolean);
+        }
+
+        function translateSubcategoryName(name) {
+            const map = {
+                "Accessories": "Acessórios",
+                "Accessory": "Acessórios",
+                "Adapters": "Adaptadores",
+                "Adapter": "Adaptadores",
+                "Cables": "Cabos",
+                "Cable": "Cabos",
+                "Chargers": "Carregadores",
+                "Charger": "Carregadores",
+                "Phones": "Telemóveis",
+                "Phone": "Telemóveis",
+                "Smartphones": "Smartphones",
+                "Mobile": "Dispositivos móveis",
+                "Mouse": "Ratos",
+                "Mice": "Ratos",
+                "Keyboard": "Teclados",
+                "Keyboards": "Teclados",
+                "Monitor": "Monitores",
+                "Monitors": "Monitores",
+                "Laptop": "Portáteis",
+                "Laptops": "Portáteis",
+                "Speaker": "Colunas",
+                "Speakers": "Colunas",
+                "Headphones": "Auscultadores",
+                "Earbuds": "Earbuds",
+                "USB": "USB",
+                "Home": "Casa",
+                "Kitchen": "Cozinha",
+                "Coffee": "Café",
+                "Heating": "Aquecimento",
+                "Watch": "Relógios",
+                "Watches": "Relógios",
+                "Storage": "Armazenamento",
+                "Power Banks": "Power Banks",
+                "Case": "Capas",
+                "Cases": "Capas"
+            };
+
+            return map[name] || name;
+        }
+
+        function categorizeSubcategory(sub) {
+            const value = (sub || "").toLowerCase();
+
+            if (
+                value.includes("cable") ||
+                value.includes("adapter") ||
+                value.includes("charger") ||
+                value.includes("usb") ||
+                value.includes("power")
+            ) {
+                return "Energia e conectividade";
+            }
+
+            if (
+                value.includes("phone") ||
+                value.includes("mobile") ||
+                value.includes("smartphone") ||
+                value.includes("watch")
+            ) {
+                return "Dispositivos móveis";
+            }
+
+            if (
+                value.includes("mouse") ||
+                value.includes("keyboard") ||
+                value.includes("monitor") ||
+                value.includes("laptop") ||
+                value.includes("storage")
+            ) {
+                return "Computadores e acessórios";
+            }
+
+            if (
+                value.includes("speaker") ||
+                value.includes("head") ||
+                value.includes("earbud") ||
+                value.includes("audio")
+            ) {
+                return "Áudio";
+            }
+
+            if (
+                value.includes("coffee") ||
+                value.includes("kitchen") ||
+                value.includes("heater") ||
+                value.includes("home")
+            ) {
+                return "Casa e cozinha";
+            }
+
+            return "Outras categorias";
+        }
+
+        function createImageHTML(product) {
+            if (product.img_link) {
+                return `<img src="${escapeHtml(product.img_link)}" alt="${escapeHtml(product.product_name)}" onerror="this.parentElement.innerHTML='<div class=&quot;emoji-fallback&quot;>${getEmojiForProduct(product.product_name)}</div>'">`;
+            }
+            return `<div class="emoji-fallback">${getEmojiForProduct(product.product_name)}</div>`;
+        }
+
+        function createPills(product) {
+            const subcategories = parseSubcategories(product.category)
+                .slice(0, 3)
+                .map(translateSubcategoryName);
+
+            return `
+                <div class="pill-row">
+                    ${subcategories.map(sub => `<span class="pill">${escapeHtml(sub)}</span>`).join("")}
+                </div>
+            `;
+        }
+
+        function createCard(product, mode = "catalog") {
+            const ratingValue = product.avg_rating ?? "N/A";
+            const ratingCountValue = product.rating_count ?? "N/A";
+            const badgeClass = mode === "top" ? "badge-top" : "badge-cat";
+            const badgeText = mode === "top" ? "Destaque" : "Catálogo";
+            const footerText = mode === "top" ? "Selecionado pelo sistema base" : "Disponível no catálogo";
+            const favoriteActive = isFavorite(product.product_id);
+            const safeProductId = (product.product_id || "").replace(/'/g, "\\'");
+
+            return `
+                <div class="product-card">
+                    <div class="product-image">
+                        ${createImageHTML(product)}
+                        <button class="fav-btn ${favoriteActive ? "active" : ""}" onclick="toggleFavorite('${safeProductId}')" title="Favorito">
+                            ${favoriteActive ? "❤️" : "🤍"}
+                        </button>
+                    </div>
+
+                    <div class="product-content">
+                        <div class="badge-row">
+                            <div class="badge-group">
+                                <span class="badge ${badgeClass}">${badgeText}</span>
+                                <span class="badge badge-rating">⭐ ${ratingValue}</span>
+                                <span class="badge badge-count">🧾 ${ratingCountValue}</span>
+                            </div>
+                        </div>
+
+                        <div class="product-title">${escapeHtml(product.product_name || "Produto sem nome")}</div>
+
+                        <div class="product-meta"><strong>ID:</strong> ${escapeHtml(product.product_id || "N/A")}</div>
+                        <div class="product-meta"><strong>Categoria principal:</strong> ${escapeHtml(translateSubcategoryName(parseSubcategories(product.category)[0] || "N/A"))}</div>
+
+                        ${createPills(product)}
+
+                        <div class="price-row">
+                            <div class="price">${formatPrice(product.discounted_price)}</div>
+                            <div class="old-price">${product.actual_price ? formatPrice(product.actual_price) : ""}</div>
+                            <div class="discount-label">${product.discount_percentage ? `-${Number(product.discount_percentage).toFixed(0)}%` : ""}</div>
+                        </div>
+
+                        <div class="card-footer">
+                            <span class="small-note">${footerText}</span>
+                            <div class="card-actions">
+                                <button class="ghost-btn" onclick="toggleFavorite('${safeProductId}')">
+                                    ${favoriteActive ? "Remover" : "Favorito"}
+                                </button>
+                                <button class="view-btn" onclick="showDetails('${safeProductId}')">Detalhes</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderHomeTopPreview() {
+            const container = document.getElementById("homeTopPreview");
+
+            if (!topProducts.length) {
+                container.innerHTML = `<div class="status-message">Não há produtos em destaque.</div>`;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="products-grid">
+                    ${topProducts.slice(0, 4).map(product => createCard(product, "top")).join("")}
+                </div>
+            `;
+        }
+
+        function renderTopProducts() {
+            const container = document.getElementById("topRecommendations");
+
+            if (!topProducts.length) {
+                container.innerHTML = `<div class="status-message">Não há produtos em destaque.</div>`;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="products-grid">
+                    ${topProducts.map(product => createCard(product, "top")).join("")}
+                </div>
+            `;
+        }
+
+        function renderAllProducts(productsToRender) {
+            const container = document.getElementById("allProducts");
+
+            if (!productsToRender.length) {
+                filteredProducts = [];
+                container.innerHTML = `<div class="status-message">Não foram encontrados produtos.</div>`;
+                return;
+            }
+
+            filteredProducts = productsToRender;
+
+            const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+            if (currentPage > totalPages) currentPage = totalPages || 1;
+
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageItems = filteredProducts.slice(start, end);
+
+            container.innerHTML = `
+                <div class="products-grid">
+                    ${pageItems.map(product => createCard(product, "catalog")).join("")}
+                </div>
+
+                <div class="pagination">
+                    <button onclick="prevPage()" ${currentPage === 1 ? "disabled" : ""}>⬅ Anterior</button>
+                    <span>Página ${currentPage} de ${totalPages}</span>
+                    <button onclick="nextPage()" ${currentPage >= totalPages ? "disabled" : ""}>Seguinte ➡</button>
+                </div>
+            `;
+        }
+
+        function renderFavorites() {
+            const container = document.getElementById("favoritesList");
+            const favoriteIds = getFavorites();
+
+            const uniqueProductsMap = new Map();
+            [...topProducts, ...allProducts].forEach(product => {
+                if (!uniqueProductsMap.has(product.product_id)) {
+                    uniqueProductsMap.set(product.product_id, product);
+                }
+            });
+
+            const favoriteProducts = favoriteIds
+                .map(id => uniqueProductsMap.get(id))
+                .filter(Boolean);
+
+            if (!favoriteProducts.length) {
+                container.innerHTML = `
+                    <div class="favorites-empty">
+                        <h3>Ainda não tens favoritos</h3>
+                        <p>Guarda produtos no coração para aparecerem aqui.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="products-grid">
+                    ${favoriteProducts.map(product => createCard(product, "catalog")).join("")}
+                </div>
+            `;
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderAllProducts(filteredProducts);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderAllProducts(filteredProducts);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+        }
+
+        function nextCategoryPage() {
+            const products = getFilteredSubcategoryProducts(selectedSubcategoryName);
+            const totalPages = Math.ceil(products.length / categoryItemsPerPage);
+            if (categoryCurrentPage < totalPages) {
+                categoryCurrentPage++;
+                renderSubcategoryProducts(selectedSubcategoryName);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+        }
+
+        function prevCategoryPage() {
+            if (categoryCurrentPage > 1) {
+                categoryCurrentPage--;
+                renderSubcategoryProducts(selectedSubcategoryName);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+        }
+
+        function buildCategoryStructure() {
+            categoryStructure = {
+                "Energia e conectividade": {},
+                "Dispositivos móveis": {},
+                "Computadores e acessórios": {},
+                "Áudio": {},
+                "Casa e cozinha": {},
+                "Outras categorias": {}
+            };
+
+            subcategoryMap = {};
+
+            allProducts.forEach(product => {
+                const subcategories = parseSubcategories(product.category);
+
+                subcategories.forEach(sub => {
+                    const translatedSub = translateSubcategoryName(sub);
+                    const mainCategory = categorizeSubcategory(sub);
+
+                    if (!categoryStructure[mainCategory][translatedSub]) {
+                        categoryStructure[mainCategory][translatedSub] = [];
+                    }
+
+                    if (!subcategoryMap[translatedSub]) {
+                        subcategoryMap[translatedSub] = [];
+                    }
+
+                    categoryStructure[mainCategory][translatedSub].push(product);
+                    subcategoryMap[translatedSub].push(product);
+                });
+            });
+        }
+
+        function populateSubcategoryFilter() {
+            const select = document.getElementById("subcategoryFilter");
+            select.innerHTML = `<option value="">Todas as subcategorias</option>`;
+
+            Object.keys(subcategoryMap)
+                .sort((a, b) => a.localeCompare(b))
+                .forEach(sub => {
+                    const option = document.createElement("option");
+                    option.value = sub;
+                    option.textContent = `${sub} (${subcategoryMap[sub].length})`;
+                    select.appendChild(option);
+                });
+        }
+
+        function updateSidebarMeta() {
+            const categoriesCount = Object.keys(categoryStructure).filter(cat => Object.keys(categoryStructure[cat]).length > 0).length;
+            const subcategoriesCount = Object.keys(subcategoryMap).length;
+            document.getElementById("sidebarMeta").textContent = `${categoriesCount} categorias • ${subcategoriesCount} subcategorias`;
+        }
+
+        function renderCategorySidebar() {
+            const sidebar = document.getElementById("categorySidebar");
+            const searchValue = (document.getElementById("categorySearchInput")?.value || "").toLowerCase().trim();
+
+            const visibleGroups = Object.entries(categoryStructure).map(([mainCategory, subMap]) => {
+                let subcategories = Object.keys(subMap).sort((a, b) => a.localeCompare(b));
+
+                if (searchValue) {
+                    subcategories = subcategories.filter(sub =>
+                        sub.toLowerCase().includes(searchValue)
+                    );
+                }
+
+                return {
+                    mainCategory,
+                    subcategories,
+                    subMap
+                };
+            }).filter(group => group.subcategories.length > 0);
+
+            if (!visibleGroups.length) {
+                sidebar.innerHTML = `<div class="status-message" style="margin: 14px;">Nenhuma subcategoria encontrada.</div>`;
+                return;
+            }
+
+            if (!openedCategory || !visibleGroups.some(group => group.mainCategory === openedCategory)) {
+                openedCategory = visibleGroups[0].mainCategory;
+            }
+
+            sidebar.innerHTML = visibleGroups.map(({ mainCategory, subcategories, subMap }) => {
+                const totalProductsInGroup = subcategories.reduce((sum, sub) => sum + subMap[sub].length, 0);
+
+                return `
+                    <div class="category-group ${openedCategory === mainCategory ? "open" : ""}">
+                        <button class="category-header-btn" onclick="toggleCategoryGroup('${mainCategory.replace(/'/g, "\\'")}')">
+                            <div class="category-header-left">
+                                <span>${escapeHtml(mainCategory)}</span>
+                                <span class="category-header-count">${subcategories.length} subcategoria(s) • ${totalProductsInGroup} produto(s)</span>
+                            </div>
+                            <span class="category-chevron">▶</span>
+                        </button>
+
+                        <div class="category-items">
+                            ${subcategories.map(sub => `
+                                <div class="subcategory-item ${selectedSubcategoryName === sub ? "active" : ""}" data-subcategory="${escapeHtml(sub)}" onclick="selectSubcategory('${sub.replace(/'/g, "\\'")}')">
+                                    <div class="subcategory-main">
+                                        <span>${escapeHtml(sub)}</span>
+                                        <span class="subcategory-count">${subMap[sub].length} produto(s)</span>
+                                    </div>
+                                    <span>›</span>
+                                </div>
+                            `).join("")}
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        function toggleCategoryGroup(categoryName) {
+            if (openedCategory === categoryName) {
+                openedCategory = null;
+            } else {
+                openedCategory = categoryName;
+            }
+
+            renderCategorySidebar();
+        }
+
+        function selectSubcategory(subcategoryName) {
+            selectedSubcategoryName = subcategoryName;
+            categoryCurrentPage = 1;
+            categoryQuickFilter = "all";
+            categorySortMode = "name_asc";
+
+            const foundGroup = Object.entries(categoryStructure).find(([mainCategory, subMap]) =>
+                Object.keys(subMap).includes(subcategoryName)
+            );
+
+            if (foundGroup) {
+                openedCategory = foundGroup[0];
+            }
+
+            renderCategorySidebar();
+            renderSubcategoryProducts(subcategoryName);
+        }
+
+        function setCategoryQuickFilter(filter) {
+            categoryQuickFilter = filter;
+            categoryCurrentPage = 1;
+            renderSubcategoryProducts(selectedSubcategoryName);
+        }
+
+        function setCategorySort(sortMode) {
+            categorySortMode = sortMode;
+            categoryCurrentPage = 1;
+            renderSubcategoryProducts(selectedSubcategoryName);
+        }
+
+        function getFilteredSubcategoryProducts(subcategoryName) {
+            let products = [...(subcategoryMap[subcategoryName] || [])];
+
+            if (categoryQuickFilter === "favorites") {
+                products = products.filter(product => isFavorite(product.product_id));
+            } else if (categoryQuickFilter === "top-rated") {
+                products = products.filter(product => Number(product.avg_rating || 0) >= 4);
+            } else if (categoryQuickFilter === "budget") {
+                products = products.filter(product => Number(product.discounted_price || 0) > 0 && Number(product.discounted_price || 0) <= 50);
+            }
+
+            switch (categorySortMode) {
+                case "name_desc":
+                    products.sort((a, b) => (b.product_name || "").localeCompare(a.product_name || ""));
+                    break;
+                case "price_asc":
+                    products.sort((a, b) => Number(a.discounted_price || 0) - Number(b.discounted_price || 0));
+                    break;
+                case "price_desc":
+                    products.sort((a, b) => Number(b.discounted_price || 0) - Number(a.discounted_price || 0));
+                    break;
+                case "rating_desc":
+                    products.sort((a, b) => Number(b.avg_rating || 0) - Number(a.avg_rating || 0));
+                    break;
+                case "count_desc":
+                    products.sort((a, b) => Number(b.rating_count || 0) - Number(a.rating_count || 0));
+                    break;
+                case "name_asc":
+                default:
+                    products.sort((a, b) => (a.product_name || "").localeCompare(b.product_name || ""));
+                    break;
+            }
+
+            return products;
+        }
+
+        function renderSubcategoryProducts(subcategoryName) {
+            const container = document.getElementById("subcategoryLanding");
+            const rawProducts = subcategoryMap[subcategoryName] || [];
+            const products = getFilteredSubcategoryProducts(subcategoryName);
+
+            if (!rawProducts.length) {
+                container.innerHTML = `<div class="status-message">Não há produtos nesta subcategoria.</div>`;
+                return;
+            }
+
+            if (!products.length) {
+                container.innerHTML = `
+                    <div class="subcategory-topbar">
+                        <div class="subcategory-topbar-grid">
+                            <div>
+                                <div class="section-title" style="font-size: 28px;">${escapeHtml(subcategoryName)}</div>
+                                <div class="section-subtitle">0 produtos após aplicar o filtro atual.</div>
+                            </div>
+
+                            <div class="select-box">
+                                <span>⚡</span>
+                                <select onchange="setCategoryQuickFilter(this.value)">
+                                    <option value="all" ${categoryQuickFilter === "all" ? "selected" : ""}>Todos</option>
+                                    <option value="favorites" ${categoryQuickFilter === "favorites" ? "selected" : ""}>Só favoritos</option>
+                                    <option value="top-rated" ${categoryQuickFilter === "top-rated" ? "selected" : ""}>Rating 4+</option>
+                                    <option value="budget" ${categoryQuickFilter === "budget" ? "selected" : ""}>Até $50</option>
+                                </select>
+                            </div>
+
+                            <div class="select-box">
+                                <span>↕</span>
+                                <select onchange="setCategorySort(this.value)">
+                                    <option value="name_asc" ${categorySortMode === "name_asc" ? "selected" : ""}>Nome A-Z</option>
+                                    <option value="name_desc" ${categorySortMode === "name_desc" ? "selected" : ""}>Nome Z-A</option>
+                                    <option value="price_asc" ${categorySortMode === "price_asc" ? "selected" : ""}>Preço crescente</option>
+                                    <option value="price_desc" ${categorySortMode === "price_desc" ? "selected" : ""}>Preço decrescente</option>
+                                    <option value="rating_desc" ${categorySortMode === "rating_desc" ? "selected" : ""}>Maior rating</option>
+                                    <option value="count_desc" ${categorySortMode === "count_desc" ? "selected" : ""}>Mais avaliações</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="subcategory-kpis">
+                            <div class="subcategory-kpi">Total na subcategoria: ${rawProducts.length}</div>
+                            <div class="subcategory-kpi">A mostrar: 0</div>
+                        </div>
+
+                        <div class="chips-row">
+                            <button class="chip ${categoryQuickFilter === "all" ? "active" : ""}" onclick="setCategoryQuickFilter('all')">Todos</button>
+                            <button class="chip ${categoryQuickFilter === "favorites" ? "active" : ""}" onclick="setCategoryQuickFilter('favorites')">Favoritos</button>
+                            <button class="chip ${categoryQuickFilter === "top-rated" ? "active" : ""}" onclick="setCategoryQuickFilter('top-rated')">Rating 4+</button>
+                            <button class="chip ${categoryQuickFilter === "budget" ? "active" : ""}" onclick="setCategoryQuickFilter('budget')">Até $50</button>
+                        </div>
+                    </div>
+
+                    <div class="subcategory-empty">
+                        <h3>Sem resultados nesta vista</h3>
+                        <p>Tenta mudar o filtro rápido ou a ordenação.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const avgRating = products.length
+                ? (products.reduce((sum, product) => sum + Number(product.avg_rating || 0), 0) / products.length).toFixed(2)
+                : "0.00";
+
+            const favoritesInside = products.filter(product => isFavorite(product.product_id)).length;
+
+            const totalPages = Math.ceil(products.length / categoryItemsPerPage);
+            if (categoryCurrentPage > totalPages) categoryCurrentPage = totalPages || 1;
+
+            const start = (categoryCurrentPage - 1) * categoryItemsPerPage;
+            const end = start + categoryItemsPerPage;
+            const pageItems = products.slice(start, end);
+
+            container.innerHTML = `
+                <div class="subcategory-topbar">
+                    <div class="subcategory-topbar-grid">
+                        <div>
+                            <div class="section-title" style="font-size: 28px;">${escapeHtml(subcategoryName)}</div>
+                            <div class="section-subtitle">Explora esta subcategoria com filtros rápidos, ordenação e paginação.</div>
+                        </div>
+
+                        <div class="select-box">
+                            <span>⚡</span>
+                            <select onchange="setCategoryQuickFilter(this.value)">
+                                <option value="all" ${categoryQuickFilter === "all" ? "selected" : ""}>Todos</option>
+                                <option value="favorites" ${categoryQuickFilter === "favorites" ? "selected" : ""}>Só favoritos</option>
+                                <option value="top-rated" ${categoryQuickFilter === "top-rated" ? "selected" : ""}>Rating 4+</option>
+                                <option value="budget" ${categoryQuickFilter === "budget" ? "selected" : ""}>Até $50</option>
+                            </select>
+                        </div>
+
+                        <div class="select-box">
+                            <span>↕</span>
+                            <select onchange="setCategorySort(this.value)">
+                                <option value="name_asc" ${categorySortMode === "name_asc" ? "selected" : ""}>Nome A-Z</option>
+                                <option value="name_desc" ${categorySortMode === "name_desc" ? "selected" : ""}>Nome Z-A</option>
+                                <option value="price_asc" ${categorySortMode === "price_asc" ? "selected" : ""}>Preço crescente</option>
+                                <option value="price_desc" ${categorySortMode === "price_desc" ? "selected" : ""}>Preço decrescente</option>
+                                <option value="rating_desc" ${categorySortMode === "rating_desc" ? "selected" : ""}>Maior rating</option>
+                                <option value="count_desc" ${categorySortMode === "count_desc" ? "selected" : ""}>Mais avaliações</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="subcategory-kpis">
+                        <div class="subcategory-kpi">Total na subcategoria: ${rawProducts.length}</div>
+                        <div class="subcategory-kpi">Após filtros: ${products.length}</div>
+                        <div class="subcategory-kpi">Média de rating: ${avgRating}</div>
+                        <div class="subcategory-kpi">Favoritos nesta vista: ${favoritesInside}</div>
+                    </div>
+
+                    <div class="chips-row">
+                        <button class="chip ${categoryQuickFilter === "all" ? "active" : ""}" onclick="setCategoryQuickFilter('all')">Todos</button>
+                        <button class="chip ${categoryQuickFilter === "favorites" ? "active" : ""}" onclick="setCategoryQuickFilter('favorites')">Favoritos</button>
+                        <button class="chip ${categoryQuickFilter === "top-rated" ? "active" : ""}" onclick="setCategoryQuickFilter('top-rated')">Rating 4+</button>
+                        <button class="chip ${categoryQuickFilter === "budget" ? "active" : ""}" onclick="setCategoryQuickFilter('budget')">Até $50</button>
+                    </div>
+                </div>
+
+                <div class="products-grid">
+                    ${pageItems.map(product => createCard(product, "catalog")).join("")}
+                </div>
+
+                <div class="pagination">
+                    <button onclick="prevCategoryPage()" ${categoryCurrentPage === 1 ? "disabled" : ""}>⬅ Anterior</button>
+                    <span>Página ${categoryCurrentPage} de ${totalPages}</span>
+                    <button onclick="nextCategoryPage()" ${categoryCurrentPage >= totalPages ? "disabled" : ""}>Seguinte ➡</button>
+                </div>
+            `;
+        }
+
+        function sortProducts(products) {
+            const sortValue = document.getElementById("sortFilter").value;
+            const sorted = [...products];
+
+            switch (sortValue) {
+                case "name_desc":
+                    sorted.sort((a, b) => (b.product_name || "").localeCompare(a.product_name || ""));
+                    break;
+                case "price_asc":
+                    sorted.sort((a, b) => Number(a.discounted_price || 0) - Number(b.discounted_price || 0));
+                    break;
+                case "price_desc":
+                    sorted.sort((a, b) => Number(b.discounted_price || 0) - Number(a.discounted_price || 0));
+                    break;
+                case "rating_desc":
+                    sorted.sort((a, b) => Number(b.avg_rating || 0) - Number(a.avg_rating || 0));
+                    break;
+                case "count_desc":
+                    sorted.sort((a, b) => Number(b.rating_count || 0) - Number(a.rating_count || 0));
+                    break;
+                case "name_asc":
+                default:
+                    sorted.sort((a, b) => (a.product_name || "").localeCompare(b.product_name || ""));
+                    break;
+            }
+
+            return sorted;
+        }
+
+        function filterProducts() {
+            currentPage = 1;
+
+            const query = document.getElementById("searchInput").value.toLowerCase().trim();
+            const selectedSubcategory = document.getElementById("subcategoryFilter").value;
+
+            let filtered = allProducts.filter(product => {
+                const matchesText =
+                    (product.product_name || "").toLowerCase().includes(query) ||
+                    (product.product_id || "").toLowerCase().includes(query) ||
+                    (product.category || "").toLowerCase().includes(query);
+
+                const translatedSubs = parseSubcategories(product.category).map(translateSubcategoryName);
+                const matchesSubcategory = !selectedSubcategory || translatedSubs.includes(selectedSubcategory);
+
+                return matchesText && matchesSubcategory;
+            });
+
+            filtered = sortProducts(filtered);
+            renderAllProducts(filtered);
+        }
+
+        function updateStats() {
+            document.getElementById("statTop").textContent = topProducts.length;
+            document.getElementById("statCatalog").textContent = allProducts.length;
+
+            const avgTopRating = topProducts.length
+                ? (topProducts.reduce((sum, p) => sum + Number(p.avg_rating || 0), 0) / topProducts.length).toFixed(2)
+                : "0.00";
+
+            document.getElementById("statAvg").textContent = avgTopRating;
+            document.getElementById("statCategories").textContent = Object.keys(subcategoryMap).length;
+
+            document.getElementById("heroTop").textContent = topProducts.length;
+            document.getElementById("heroCatalog").textContent = allProducts.length;
+            document.getElementById("heroSubcategories").textContent = Object.keys(subcategoryMap).length;
+        }
+
+        function showPage(pageId, buttonEl = null) {
+            document.querySelectorAll(".page").forEach(page => page.classList.remove("active"));
+            document.getElementById(pageId).classList.add("active");
+
+            document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+
+            if (buttonEl) {
+                buttonEl.classList.add("active");
+            } else {
+                const matching = document.querySelector(`.nav-btn[data-page="${pageId}"]`);
+                if (matching) matching.classList.add("active");
+            }
+
+            if (pageId === "favoritesPage") {
+                renderFavorites();
+            }
+
+            if (pageId === "categoriesPage") {
+                renderCategorySidebar();
+                if (selectedSubcategoryName) {
+                    renderSubcategoryProducts(selectedSubcategoryName);
+                }
+            }
+        }
+
+        function activatePageById(pageId) {
+            showPage(pageId);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function showDetails(productId) {
+            const merged = [...topProducts, ...allProducts];
+            const uniqueProductsMap = new Map();
+
+            merged.forEach(product => {
+                if (!uniqueProductsMap.has(product.product_id)) {
+                    uniqueProductsMap.set(product.product_id, product);
+                }
+            });
+
+            const product = uniqueProductsMap.get(productId);
+            if (!product) return;
+
+            const modalBody = document.getElementById("modalBody");
+            const ratingText = product.avg_rating ?? "N/A";
+            const isFav = isFavorite(product.product_id);
+
+            modalBody.innerHTML = `
+                <div class="modal-grid">
+                    <div class="modal-image">
+                        ${
+                            product.img_link
+                                ? `<img src="${escapeHtml(product.img_link)}" alt="${escapeHtml(product.product_name)}" onerror="this.parentElement.innerHTML='<div class=&quot;modal-fallback&quot;>${getEmojiForProduct(product.product_name)}</div>'">`
+                                : `<div class="modal-fallback">${getEmojiForProduct(product.product_name)}</div>`
+                        }
+                    </div>
+
+                    <div class="modal-details">
+                        <h3>${escapeHtml(product.product_name || "Produto sem nome")}</h3>
+                        <p><strong>ID:</strong> ${escapeHtml(product.product_id || "N/A")}</p>
+                        <p><strong>Categoria:</strong> ${escapeHtml(product.category || "N/A")}</p>
+                        <p><strong>Preço com desconto:</strong> ${formatPrice(product.discounted_price)}</p>
+                        <p><strong>Preço original:</strong> ${formatPrice(product.actual_price)}</p>
+                        <p><strong>Desconto:</strong> ${product.discount_percentage ? `${Number(product.discount_percentage).toFixed(0)}%` : "N/A"}</p>
+                        <p><strong>Número de ratings:</strong> ${product.rating_count ?? "N/A"}</p>
+                        <p><strong>Rating médio:</strong> ${ratingText}</p>
+                        ${
+                            product.about_product
+                                ? `<p><strong>Sobre o produto:</strong> ${escapeHtml(product.about_product)}</p>`
+                                : ""
+                        }
+                        <div class="modal-links">
+                            ${
+                                product.product_link
+                                    ? `<a href="${escapeHtml(product.product_link)}" target="_blank">Abrir produto</a>`
+                                    : ""
+                            }
+                            <button onclick="toggleFavorite('${(product.product_id || "").replace(/'/g, "\\'")}'); showDetails('${(product.product_id || "").replace(/'/g, "\\'")}')">
+                                ${isFav ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById("modalOverlay").classList.add("show");
+        }
+
+        function closeModal(event) {
+            if (event.target.id === "modalOverlay") {
+                forceCloseModal();
+            }
+        }
+
+        function forceCloseModal() {
+            document.getElementById("modalOverlay").classList.remove("show");
+        }
+
+        async function loadTopProducts() {
+            const response = await fetch("http://127.0.0.1:8000/top_rated_products/");
+            if (!response.ok) {
+                throw new Error(`Top products HTTP error: ${response.status}`);
+            }
+            topProducts = await response.json();
+            renderTopProducts();
+            renderHomeTopPreview();
+        }
+
+        async function loadAllProducts() {
+            const response = await fetch("http://127.0.0.1:8000/products/");
+            if (!response.ok) {
+                throw new Error(`Products HTTP error: ${response.status}`);
+            }
+            allProducts = await response.json();
+
+            buildCategoryStructure();
+            populateSubcategoryFilter();
+            updateSidebarMeta();
+            renderCategorySidebar();
+
+            filteredProducts = sortProducts(allProducts);
+            renderAllProducts(filteredProducts);
+        }
+
+        async function loadPageData() {
+            try {
+                await Promise.all([loadTopProducts(), loadAllProducts()]);
+                updateStats();
+                updateFavoritesCounter();
+                renderFavorites();
+            } catch (error) {
+                console.error("Error loading page data:", error);
+                document.getElementById("topRecommendations").innerHTML = `<div class="status-message">Falha ao carregar os produtos em destaque.</div>`;
+                document.getElementById("homeTopPreview").innerHTML = `<div class="status-message">Falha ao carregar a pré-visualização.</div>`;
+                document.getElementById("allProducts").innerHTML = `<div class="status-message">Falha ao carregar o catálogo.</div>`;
+                document.getElementById("categorySidebar").innerHTML = `<div class="status-message">Falha ao carregar as categorias.</div>`;
+                document.getElementById("favoritesList").innerHTML = `<div class="status-message">Falha ao carregar os favoritos.</div>`;
+            }
+        }
+
+        window.onload = loadPageData;
+    </script>
 </body>
 </html>
