@@ -4,12 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-fastapi = "*"
-uvicorn = "*"
 sqlalchemy = "*"
 scikit-learn = "*"
 pandas = "*"
 numpy = "*"
+uvicorn = "*"
+fastapi = "*"
 
 [dev-packages]
 
