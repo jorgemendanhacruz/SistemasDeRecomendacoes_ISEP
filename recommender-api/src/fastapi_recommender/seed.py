@@ -13,7 +13,7 @@ print("CSV loaded successfully!")
 # Products Import
 
 existing_product_ids = {
-    pid for (pid,) in db.query(Product.product_id).all()
+    pid for (pid,) in db.query(Product.product_id).all()  #evita inserir produtos duplicados
 }
 
 for _, row in df.iterrows():

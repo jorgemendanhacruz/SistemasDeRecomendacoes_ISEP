@@ -22,7 +22,7 @@ mlb = None
 scaler = None
 
 @app.on_event("startup")
-def load_and_preprocess_data():
+def load_and_preprocess_data(): #Em vez de recalcular a similaridade sempre que alguém pede recomendações, vocês fazem isso uma vez só no arranque. Isso melhora eficiência.
     global df, similarity_matrix, price_scaled, mlb, scaler
 
     # Get the folder where this script lives
@@ -127,7 +127,7 @@ def get_products(db: Session = Depends(get_db)):
 
 # ---------------- RECOMMENDATIONS ROUTE ---------------- #
 
-@app.get("/top_rated_products/")
+@app.get("/top_rated_products/") # produtos com maior média de ratings. recomendação não personalizada
 def get_top_rated_products(db: Session = Depends(get_db)):
     top_products = (
         db.query(Product, func.avg(Rating.rating).label("avg_rating"))
@@ -148,12 +148,12 @@ def get_top_rated_products(db: Session = Depends(get_db)):
     ]
 
 
-@app.get("/top_products_cbf/user{user_id}")
+@app.get("/top_products_cbf/user{user_id}")  #recomendações personalizadas para um utilizador
 def get_top_rated_products(user_id: str, db: Session = Depends(get_db)):
     user_ratings = db.query(Rating).filter(Rating.user_id == user_id).all()
 
     rated_products = {rating.product_id: rating.rating for rating in user_ratings}
-    recommendations = get_recommendations(rated_products,similarity_matrix,df,5)
+    recommendations = get_recommendations(rated_products,similarity_matrix,df,5)  # vai buscar todos os produtos recomendados
 
     products = db.query(Product).filter(Product.product_id.in_(recommendations)).all()
 

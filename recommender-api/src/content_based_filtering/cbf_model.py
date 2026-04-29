@@ -4,7 +4,7 @@ import pandas as pd
 #--------- Recommendations ---------------------------#
 
 
-def get_nearest_products(product_id, similarity_matrix, df, k):
+def get_nearest_products(product_id, similarity_matrix, df, k): #Gera recomendações personalizadas com base nos produtos que o utilizador avaliou.
     product_index_map = pd.Series(
         df.index,
         index=df["product_id"]
@@ -37,13 +37,13 @@ def get_recommendations(rated_products, similarity_matrix,df,n):
 
     candidates = {}
 
-    for p, r in rated_products.items():
+    for p, r in rated_products.items(): #vê os produtos avaliados pelo utilizador
 
-        k_nearest = get_nearest_products(p,similarity_matrix,df,n*2)
+        k_nearest = get_nearest_products(p,similarity_matrix,df,n*2)   #para cada produto avaliado, obtém os produtos mais semelhantes a ele, e depois soma as similaridades para obter um score de recomendação para cada produto candidato.
 
         for product, cos_sim in k_nearest.items():
             if product in rated_products:
-                continue
+                continue 
             if product in candidates:
                 candidates[product] += float(cos_sim)
             else:
@@ -51,7 +51,7 @@ def get_recommendations(rated_products, similarity_matrix,df,n):
     
     recommendations = [
         product_id 
-        for product_id, _ in sorted(candidates.items(), key=lambda x: x[1], reverse=True)[:n]
+        for product_id, _ in sorted(candidates.items(), key=lambda x: x[1], reverse=True)[:n]  #ordena e escolhe o top N
     ]
 
     return recommendations
