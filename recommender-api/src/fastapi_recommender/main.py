@@ -27,11 +27,11 @@ def load_and_preprocess_data(): #Em vez de recalcular a similaridade sempre que 
 
     # Get the folder where this script lives
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    DB_PATH = os.path.join(BASE_DIR, "../../amazon_electronics.db")
+    DB_PATH = os.path.join(BASE_DIR, "amazon_electronics.db")
 
     # Connect and load data
     with sqlite3.connect(DB_PATH) as conn:
-        df = pd.read_sql_query("SELECT * FROM products", conn)
+         df = pd.read_sql_query("SELECT * FROM products", conn)
 
     print(f"Loaded {len(df)} rows from products")
 

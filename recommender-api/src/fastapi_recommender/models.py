@@ -7,7 +7,10 @@ from sqlalchemy import Float
 
 Base = declarative_base()
 
-database_url = "sqlite:///./amazon_electronics.db"
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+database_url = f"sqlite:///{BASE_DIR / 'amazon_electronics.db'}"
 engine = create_engine(database_url, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

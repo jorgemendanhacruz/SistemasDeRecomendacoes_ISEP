@@ -106,8 +106,50 @@ print("Ratings imported successfully!")
 
 
 import random
+# Ratings import
 
-def add_synthetic_ratings_per_user(min_ratings=5, max_extra=7):
+def parse_to_float(value):
+    try:
+        if pd.isna(value):
+            return None
+        clean_value = str(value).replace(',', '.').replace('%', '').strip()
+        return float(clean_value)
+    except (ValueError, TypeError):
+        return None
+
+
+existing_review_ids = {
+    rid for (rid,) in db.query(Rating.review_id).all()
+}
+
+for row in df.itertuples(index=False):
+
+    if row.review_id in existing_review_ids:
+        continue
+
+    rating = Rating(
+        product_id=row.product_id,
+        user_id=row.user_id,
+        rating=parse_to_float(row.rating),
+        review_id=row.review_id,
+        review_title=row.review_title,
+        review_content=row.review_content,
+        Used_Device=row.Used_Device,
+        Day_of_Week=row.Day_of_Week
+    )
+
+    db.add(rating)
+    existing_review_ids.add(row.review_id)
+
+db.commit()
+print("Ratings imported successfully!")
+
+
+# Synthetic Ratings import
+
+import random
+
+def add_synthetic_ratings_per_user(min_ratings=5):
     existing_ratings = {
         (r.user_id, r.product_id)
         for r in db.query(Rating).all()
@@ -138,7 +180,12 @@ def add_synthetic_ratings_per_user(min_ratings=5, max_extra=7):
         base_product_id = base_rating_row["product_id"]
         base_rating = base_rating_row["rating"]
 
-        base_product = products_df[products_df["product_id"] == base_product_id]
+        if pd.isna(base_rating):
+            base_rating = 4.0
+
+        base_product = products_df[
+            products_df["product_id"] == base_product_id
+        ]
 
         if base_product.empty:
             continue
@@ -147,7 +194,7 @@ def add_synthetic_ratings_per_user(min_ratings=5, max_extra=7):
         main_category = base_categories[0]
 
         candidate_products = products_df[
-            products_df["category"].str.contains(main_category, na=False)
+            products_df["category"].str.contains(main_category, na=False, regex=False)
         ]
 
         candidate_products = candidate_products[
