@@ -666,6 +666,41 @@
             color: #3730a3;
         }
 
+        .badge-hybrid-popular {
+            background: #ffedd5;
+            color: #c2410c;
+        }
+
+        .badge-hybrid-cbf {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .badge-hybrid-user-cf {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-hybrid-item-cf {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        .recommendation-explanation {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 14px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            color: #374151;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .recommendation-explanation strong {
+            color: #111827;
+        }
+
         .product-title {
             font-size: 20px;
             font-weight: 800;
@@ -1117,7 +1152,7 @@
             </div>
 
             <div class="user-hint">
-                Nesta fase, a personalização é simulada através da seleção de utilizadores existentes na base de dados.
+                Nesta fase, a recomendação híbrida combina produtos populares, Content-Based Filtering e Collaborative Filtering, mostrando também a explicação de cada sugestão.
             </div>
 
             <div id="personalizedRecommendations" style="margin-top: 18px;">
@@ -1438,6 +1473,23 @@
             `;
         }
 
+        function getRecommendationSourceInfo(source) {
+            switch (source) {
+                case "non_personalized":
+                    return { text: "🔥 Popular", className: "badge-hybrid-popular" };
+                case "non_personalized_fallback":
+                    return { text: "🔥 Popular / Cold Start", className: "badge-hybrid-popular" };
+                case "content_based":
+                    return { text: "🧠 Content-Based", className: "badge-hybrid-cbf" };
+                case "user_based_cf":
+                    return { text: "👥 Users semelhantes", className: "badge-hybrid-user-cf" };
+                case "item_based_cf":
+                    return { text: "📦 Item-Based CF", className: "badge-hybrid-item-cf" };
+                default:
+                    return { text: "Personalizado", className: "badge-personalized" };
+            }
+        }
+
         function createCard(product, mode = "catalog") {
             const ratingValue = product.avg_rating ?? "N/A";
             const ratingCountValue = product.rating_count ?? "N/A";
@@ -1445,6 +1497,8 @@
             let badgeClass = "badge-cat";
             let badgeText = "Catálogo";
             let footerText = "Disponível no catálogo";
+            let extraBadge = "";
+            let recommendationExplanation = "";
 
             if (mode === "top") {
                 badgeClass = "badge-top";
@@ -1452,8 +1506,20 @@
                 footerText = "Recomendação do sistema não personalizado";
             } else if (mode === "personalized") {
                 badgeClass = "badge-personalized";
-                badgeText = "Personalizado";
-                footerText = "Recomendação gerada com base no perfil do utilizador";
+                badgeText = "Híbrido";
+                footerText = "Recomendação híbrida personalizada";
+
+                const sourceInfo = getRecommendationSourceInfo(product.source);
+                extraBadge = `<span class="badge ${sourceInfo.className}">${sourceInfo.text}</span>`;
+
+                if (product.explanation) {
+                    recommendationExplanation = `
+                        <div class="recommendation-explanation">
+                            <strong>💡 Porque foi recomendado?</strong><br>
+                            ${escapeHtml(product.explanation)}
+                        </div>
+                    `;
+                }
             }
 
             const favoriteActive = isFavorite(product.product_id);
@@ -1472,6 +1538,7 @@
                         <div class="badge-row">
                             <div class="badge-group">
                                 <span class="badge ${badgeClass}">${badgeText}</span>
+                                ${extraBadge}
                                 <span class="badge badge-rating">⭐ ${ratingValue}</span>
                                 <span class="badge badge-count">🧾 ${ratingCountValue}</span>
                             </div>
@@ -1483,6 +1550,7 @@
                         <div class="product-meta"><strong>Categoria principal:</strong> ${escapeHtml(translateSubcategoryName(parseSubcategories(product.category)[0] || "N/A"))}</div>
 
                         ${createPills(product)}
+                        ${recommendationExplanation}
 
                         <div class="price-row">
                             <div class="price">${formatPrice(product.discounted_price)}</div>
@@ -2110,6 +2178,11 @@
                                 ? `<p><strong>Sobre o produto:</strong> ${escapeHtml(product.about_product)}</p>`
                                 : ""
                         }
+                        ${
+                            product.explanation
+                                ? `<div class="recommendation-explanation"><strong>💡 Porque foi recomendado?</strong><br>${escapeHtml(product.explanation)}</div>`
+                                : ""
+                        }
                         <div class="modal-links">
                             ${
                                 product.product_link
@@ -2219,21 +2292,21 @@
             }
 
             container.innerHTML = `
-                <div class="status-message">A carregar recomendações personalizadas...</div>
+                <div class="status-message">A carregar recomendações híbridas...</div>
             `;
 
             try {
-                const response = await fetch(`http://127.0.0.1:8000/top_products_cbf/user${encodeURIComponent(userId)}`);
+                const response = await fetch(`http://127.0.0.1:8000/recommendations/hybrid/${encodeURIComponent(userId)}`);
                 if (!response.ok) {
-                    throw new Error(`Personalized products HTTP error: ${response.status}`);
+                    throw new Error(`Hybrid recommendations HTTP error: ${response.status}`);
                 }
 
                 personalizedProducts = await response.json();
                 renderPersonalizedProducts();
             } catch (error) {
-                console.error("Error loading personalized products:", error);
+                console.error("Error loading hybrid recommendations:", error);
                 container.innerHTML = `
-                    <div class="status-message">Falha ao carregar as recomendações personalizadas.</div>
+                    <div class="status-message">Falha ao carregar as recomendações híbridas.</div>
                 `;
             }
         }

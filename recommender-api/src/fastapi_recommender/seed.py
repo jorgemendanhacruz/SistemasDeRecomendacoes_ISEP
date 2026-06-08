@@ -105,41 +105,8 @@ print("Ratings imported successfully!")
 
 
 
-import random
-# Ratings import
-
-def parse_to_float(value):
-    try:
-        if pd.isna(value):
-            return None
-        clean_value = str(value).replace(',', '.').replace('%', '').strip()
-        return float(clean_value)
-    except (ValueError, TypeError):
-        return None
 
 
-existing_review_ids = {
-    rid for (rid,) in db.query(Rating.review_id).all()
-}
-
-for row in df.itertuples(index=False):
-
-    if row.review_id in existing_review_ids:
-        continue
-
-    rating = Rating(
-        product_id=row.product_id,
-        user_id=row.user_id,
-        rating=parse_to_float(row.rating),
-        review_id=row.review_id,
-        review_title=row.review_title,
-        review_content=row.review_content,
-        Used_Device=row.Used_Device,
-        Day_of_Week=row.Day_of_Week
-    )
-
-    db.add(rating)
-    existing_review_ids.add(row.review_id)
 
 db.commit()
 print("Ratings imported successfully!")
