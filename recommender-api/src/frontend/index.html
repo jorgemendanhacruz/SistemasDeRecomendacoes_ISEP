@@ -113,6 +113,68 @@
             border-color: rgba(255,255,255,0.14);
         }
 
+
+        .auth-panel {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            color: #e5e7eb;
+        }
+
+        .login-form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .auth-input {
+            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.08);
+            color: white;
+            border-radius: 10px;
+            padding: 9px 11px;
+            min-width: 150px;
+            outline: none;
+        }
+
+        .auth-input::placeholder {
+            color: #cbd5e1;
+        }
+
+        .auth-btn {
+            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.12);
+            color: white;
+            padding: 9px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 800;
+        }
+
+        .auth-btn:hover {
+            background: rgba(255,255,255,0.18);
+        }
+
+        .auth-user {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            font-size: 14px;
+        }
+
+        .auth-user.show {
+            display: flex;
+        }
+
+        .auth-message {
+            font-size: 12px;
+            color: #fecaca;
+            min-width: 160px;
+        }
+
         .fav-count {
             min-width: 22px;
             height: 22px;
@@ -1001,6 +1063,16 @@
                 font-size: 28px;
             }
 
+
+            .auth-panel,
+            .login-form {
+                width: 100%;
+            }
+
+            .auth-input {
+                min-width: 100%;
+            }
+
             .search-box,
             .select-box,
             .category-search-box {
@@ -1027,6 +1099,20 @@
                     Favoritos
                     <span class="fav-count" id="favoritesCounter">0</span>
                 </button>
+            </div>
+
+            <div class="auth-panel">
+                <div class="login-form" id="loginForm">
+                    <input class="auth-input" id="loginUserId" type="text" placeholder="User ID / email">
+                    <input class="auth-input" id="loginPassword" type="password" placeholder="Password">
+                    <button class="auth-btn" onclick="loginUser()">Login</button>
+                    <span class="auth-message" id="loginMessage"></span>
+                </div>
+
+                <div class="auth-user" id="loggedUserBox">
+                    <span id="loggedUserText">Sessão iniciada</span>
+                    <button class="auth-btn" onclick="logoutUser()">Logout</button>
+                </div>
             </div>
         </div>
     </header>
@@ -1264,6 +1350,8 @@
         let filteredProducts = [];
         let users = [];
         let personalizedProducts = [];
+        let currentUserId = localStorage.getItem("electrofind_user_id") || "";
+        let currentUserName = localStorage.getItem("electrofind_user_name") || "";
 
         let currentPage = 1;
         const itemsPerPage = 12;
@@ -1277,6 +1365,120 @@
         const categoryItemsPerPage = 8;
         let categorySortMode = "name_asc";
         let categoryQuickFilter = "all";
+
+
+        function updateAuthUI() {
+            const loginForm = document.getElementById("loginForm");
+            const loggedUserBox = document.getElementById("loggedUserBox");
+            const loggedUserText = document.getElementById("loggedUserText");
+            const loginMessage = document.getElementById("loginMessage");
+
+            if (!loginForm || !loggedUserBox || !loggedUserText) return;
+
+            if (currentUserId) {
+                loginForm.style.display = "none";
+                loggedUserBox.classList.add("show");
+                loggedUserText.textContent = `Sessão iniciada: ${currentUserName || "Utilizador"}`;
+
+                const select = document.getElementById("userSelect");
+                if (select) {
+                    ensureUserOption(currentUserId, currentUserName || currentUserId);
+                    select.value = currentUserId;
+                }
+            } else {
+                loginForm.style.display = "flex";
+                loggedUserBox.classList.remove("show");
+                loggedUserText.textContent = "Sessão iniciada";
+            }
+
+            if (loginMessage) {
+                loginMessage.textContent = "";
+            }
+        }
+
+        function ensureUserOption(userId, userName) {
+            const select = document.getElementById("userSelect");
+            if (!select || !userId) return;
+
+            const exists = Array.from(select.options).some(option => option.value === userId);
+            if (!exists) {
+                const option = document.createElement("option");
+                option.value = userId;
+                option.textContent = simplifyUserName(userName || userId, select.options.length);
+                select.appendChild(option);
+            }
+        }
+
+        async function loginUser() {
+            const userId = document.getElementById("loginUserId").value.trim();
+            const password = document.getElementById("loginPassword").value;
+            const loginMessage = document.getElementById("loginMessage");
+
+            if (!userId || !password) {
+                loginMessage.textContent = "Preenche user e password.";
+                return;
+            }
+
+            loginMessage.textContent = "A validar...";
+
+            try {
+                const response = await fetch("http://127.0.0.1:8000/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        password: password
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Credenciais inválidas");
+                }
+
+                const data = await response.json();
+
+                currentUserId = data.user_id;
+                currentUserName = data.user_name || data.user_id;
+
+                localStorage.setItem("electrofind_user_id", currentUserId);
+                localStorage.setItem("electrofind_user_name", currentUserName);
+
+                document.getElementById("loginPassword").value = "";
+                updateAuthUI();
+
+                const select = document.getElementById("userSelect");
+                if (select) {
+                    ensureUserOption(currentUserId, currentUserName);
+                    select.value = currentUserId;
+                }
+
+                if (document.getElementById("personalizedPage").classList.contains("active")) {
+                    loadPersonalizedProducts();
+                }
+            } catch (error) {
+                console.error("Login error:", error);
+                loginMessage.textContent = "Credenciais inválidas.";
+            }
+        }
+
+        function logoutUser() {
+            currentUserId = "";
+            currentUserName = "";
+            localStorage.removeItem("electrofind_user_id");
+            localStorage.removeItem("electrofind_user_name");
+
+            const select = document.getElementById("userSelect");
+            if (select) {
+                select.value = "";
+            }
+
+            personalizedProducts = [];
+            renderPersonalizedProducts();
+            updateAuthUI();
+        }
+
 
         function escapeHtml(text) {
             return String(text || "")
@@ -2272,6 +2474,13 @@
                     option.textContent = simplifyUserName(user.user_name, index);
                     select.appendChild(option);
                 });
+
+                if (currentUserId) {
+                    ensureUserOption(currentUserId, currentUserName || currentUserId);
+                    select.value = currentUserId;
+                }
+
+                updateAuthUI();
             } catch (error) {
                 console.error("Error loading users:", error);
                 document.getElementById("personalizedRecommendations").innerHTML = `
@@ -2281,12 +2490,13 @@
         }
 
         async function loadPersonalizedProducts() {
-            const userId = document.getElementById("userSelect").value;
+            const selectedUserId = document.getElementById("userSelect").value;
+            const userId = currentUserId || selectedUserId;
             const container = document.getElementById("personalizedRecommendations");
 
             if (!userId) {
                 container.innerHTML = `
-                    <div class="status-message">Seleciona primeiro um utilizador.</div>
+                    <div class="status-message">Faz login ou seleciona primeiro um utilizador.</div>
                 `;
                 return;
             }
@@ -2316,6 +2526,7 @@
                 await Promise.all([loadTopProducts(), loadAllProducts(), loadUsers()]);
                 updateStats();
                 updateFavoritesCounter();
+                updateAuthUI();
                 renderFavorites();
             } catch (error) {
                 console.error("Error loading page data:", error);
