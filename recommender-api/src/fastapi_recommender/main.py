@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from src.fastapi_recommender.models import SessionLocal, User, Product, Rating
@@ -15,6 +16,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 
 app = FastAPI()
+
+
+class LoginRequest(BaseModel):
+    user_id: str
+    password: str
 
 # Globals for CBF
 df = None
@@ -118,6 +124,21 @@ def get_db():
         yield db
     finally:
         db.close()
+
+# ---------------- AUTH ROUTES ---------------- #
+
+@app.post("/login")
+def login(credentials: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == credentials.user_id).first()
+
+    if not user or user.user_pass != credentials.password:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    return {
+        "success": True,
+        "user_id": user.user_id,
+        "user_name": user.user_name,
+    }
 
 # ---------------- USER ROUTES ---------------- #
 
